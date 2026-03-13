@@ -1,0 +1,22 @@
+安装 gh for git in wsl | ubuntu
+
+```bash
+
+# 提前下载 https://github.com/cli/cli/releases/download/v2.88.0/gh_2.88.0_linux_amd64.tar.gz
+
+wzy@DESKTOP-8NE4SNQ:~$ cp /mnt/c/Users/pw/downloads/gh_2.88.0_linux_amd64.tar.gz ~
+wzy@DESKTOP-8NE4SNQ:~$ ls
+gh.tar.gz gh_2.88.0_linux_amd64.tar.gz snap
+wzy@DESKTOP-8NE4SNQ:~$ tar -xf gh_2.88.0_linux_amd64.tar.gz
+wzy@DESKTOP-8NE4SNQ:~$ sudo cp gh_*_linux_amd64/bin/gh /usr/local/bin/
+[sudo] password for wzy:
+
+wzy@DESKTOP-8NE4SNQ:/usr$ gh --version
+gh version 2.88.0 (2026-03-10)
+https://github.com/cli/cli/releases/tag/v2.88.0
+
+#去github上的个人settings中创建token，需要自己问AI
+
+#git token 
+gh auth login --with-token <你的token>
+```
