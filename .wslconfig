@@ -1,0 +1,15 @@
+[wsl2]
+networkingMode=nat
+dnsTunneling=true
+# 强制 WSL 使用 Windows 的 HTTP 代理设置
+#autoProxy=false
+#后用集成防火墙支持
+autoProxy=true
+firewall=false
+dnsProxy=true
+
+[experimental]
+# 自动回收闲置内存，优化性能
+autoMemoryReclaim=gradual
+# 支持主机回环地址访问
+hostAddressLoopback=true
