@@ -1,0 +1,132 @@
+PostgreSQL 数据库创建完整指南
+====================================
+
+一、环境准备
+------------
+1. PostgreSQL 安装 (如未安装)
+   sudo apt update
+   sudo apt install postgresql postgresql-contrib -y
+
+2. 确认端口和连接
+   psql --version
+   netstat -tlnp | grep 5432
+
+二、设置密码
+-------------
+echo "Iampeter" | sudo -u postgres psql -c "ALTER USER postgres PASSWORD 'Iampeter';"
+
+三、创建测试数据库
+-------------------
+创建新的 test 数据库
+PGPASSWORD="Iampeter" psql -h localhost -U postgres -d template1 -c "CREATE DATABASE test;"
+
+四、创建 heroes 表
+------------------
+在 test 数据库中创建 heros 表
+
+SQL 语句：
+---------
+CREATE TABLE heros (
+    id SERIAL PRIMARY KEY,          -- 自增主键
+    name VARCHAR(100) NOT NULL,     -- 英雄名字
+    level INT DEFAULT 1,            -- 等级
+    class TEXT,                     -- 职业/类型
+    experience BIGINT DEFAULT 0,    -- 经验值
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP  -- 创建时间
+);
+
+五、完整命令序列
+-----------------
+执行以下命令一键创建数据库和表：
+
+# ====== 创建 test 数据库 ======
+PGPASSWORD="Iampeter" psql -h localhost -U postgres -d template1 <<EOF
+CREATE DATABASE test;
+EOF
+
+# ====== 创建 heros 表 ======
+PGPASSWORD="Iampeter" psql -h localhost -U postgres -d test <<EOF
+CREATE TABLE heros (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    level INT DEFAULT 1,
+    class TEXT,
+    experience BIGINT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+EOF
+
+# ====== 插入测试数据 ======
+INSERT INTO heros (name, level, class) VALUES 
+    ('小粽棕', 10, '战士'),
+    ('亚瑟', 5, '骑士'),
+    ('阿离', 8, '法师');
+
+-- ====== 查看所有英雄 ======
+SELECT * FROM heros ORDER BY id;
+
+六、常用操作命令
+-----------------
+查看数据库列表：
+PGPASSWORD="Iampeter" psql -h localhost -U postgres -c "SELECT datname FROM pg_database;"
+
+查看所有表：
+PGPASSWORD="Iampeter" psql -h localhost -U postgres -d test -c "\dt"
+
+插入新英雄：
+INSERT INTO heros (name, level, class) VALUES ('新英雄', 1, '未知');
+
+升级英雄等级：
+UPDATE heros SET level = level + 1 WHERE name = '小粽棕';
+
+查询特定英雄：
+SELECT id, name, level, class FROM heros WHERE class = '战士';
+
+删除英雄：
+DELETE FROM heros WHERE id = 1;
+
+清空表（保留表结构）：
+TRUNCATE TABLE heros RESTART IDENTITY;
+
+七、备份和恢复
+---------------
+备份整个数据库：
+pg_dump -h localhost -U postgres -d test > backup.sql
+
+从备份恢复：
+psql -h localhost -U postgres -d test < backup.sql
+
+八、注意事项
+-------------
+- 首次连接使用 PGPASSWORD="密码" 环境变量
+- 确保 postgres 用户已设置密码
+- 生产环境请配置 pg_hba.conf 为 scram-sha-256 认证
+- 定期备份数据库避免数据丢失
+
+九、扩展建议
+------------
+1. 添加索引提升查询性能：
+CREATE INDEX idx_heros_class ON heros(class);
+CREATE INDEX idx_heros_level ON heros(level);
+
+2. 创建视图方便管理：
+CREATE VIEW hero_rankings AS 
+SELECT name, level, class, experience FROM heros ORDER BY level DESC;
+
+3. 添加触发器自动计算经验值：
+CREATE OR REPLACE FUNCTION update_experience() RETURNS TRIGGER AS $$
+BEGIN
+    NEW.experience = NEW.level * 100 + RANDOM() * 100;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+CREATE TRIGGER set_experience BEFORE INSERT ON heros FOR EACH ROW EXECUTE FUNCTION update_experience();
+
+十、总结
+--------
+✅ 数据库：test  
+✅ 表：heros (id, name, level, class, experience, created_at)  
+✅ 用户：postgres / Iampeter  
+✅ 端口：5432  
+
+🎉 完成！你的 PostgreSQL 数据库已准备就绪～ 🌯🐘
